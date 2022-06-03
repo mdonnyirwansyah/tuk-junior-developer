@@ -18,7 +18,7 @@
                         <div class="card-title mb-3">
                             <h2>Form Pemesanan</h2>
                         </div>
-                        <form action="{{ route('pesanan.store') }}" id="form-action" enctype="multipart/form-data">
+                        <form action="{{ route('pesanan.store') }}" id="store" enctype="multipart/form-data">
                             <div class="form-group row mb-2">
                                 <label for="nama_lengkap" class="col-sm-4 col-form-label">Nama Lengkap</label>
                                 <div class="col-sm-8">
@@ -50,7 +50,7 @@
                             <div id="review_wisata_tab" class="d-none form-group row mb-2">
                                 <label for="tempat_wisata" class="col-sm-4 col-form-label">Review Wisata</label>
                                 <div class="col-sm-8">
-                                    <iframe id="review_wisata" src="" title="YouTube video player" frameborder="0" allowfullscreen></iframe>
+                                    <iframe id="review_wisata" width="100%" src="" title="YouTube video player" frameborder="0" allowfullscreen></iframe>
                                 </div>
                             </div>
                             <div class="form-group row mb-2">
@@ -149,83 +149,10 @@
         </div>
 
         <script src="{{ asset('js/app.js') }}"></script>
+        @include('pesanan.hitung-total-bayar')
+        @include('pesanan.store')
         <script>
             $(document).ready( function() {
-                $('#tempat_wisata').change(function (e) {
-                    $('#total_bayar').val("");
-
-                    var tempat_wisata = e.target.value;
-                    var harga_tiket;
-                    var url_review;
-
-                    if (tempat_wisata === "Bukit Suligi") {
-                        harga_tiket = 40000;
-                        url_review = "https://www.youtube.com/embed/C3bVw3BFWlw";
-                        $('#review_wisata_tab').removeClass('d-none');
-                    } else if (tempat_wisata === "Puncak Kabur") {
-                        harga_tiket = 35000;
-                        url_review = "https://www.youtube.com/embed/pG8E_35fG9U";
-                        $('#review_wisata_tab').removeClass('d-none');
-                    } else {
-                        $('#review_wisata_tab').addClass('d-none');
-                    }
-                    console.log(tempat_wisata);
-
-                    $('#harga_tiket').val(harga_tiket);
-                    $('#review_wisata').attr('src', url_review);
-                });
-
-                $('#hitung_total_bayar').click(function (e) {
-                    e.preventDefault();
-
-                    var harga_tiket = $('#harga_tiket').val();
-                    var pengunjung_dewasa = $('#pengunjung_dewasa').val();
-                    var pengunjung_anak = $('#pengunjung_anak').val();
-                    var total_bayar = 0;
-
-                    total_bayar = (harga_tiket * pengunjung_dewasa) + (harga_tiket * pengunjung_anak / 2);
-                    $('#total_bayar').val(total_bayar);
-                });
-
-                $('#form-action').submit(function (e) {
-                    e.preventDefault();
-
-                    $('#btn').attr('disabled', true);
-                    $.ajax({
-                        url: $(this).attr('action'),
-                        type: 'POST',
-                        data: new FormData(this),
-                        contentType: false,
-                        cache: false,
-                        processData: false,
-                        dataType: 'json',
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
-                        success: function (response) {
-                            var pesanan = response.success;
-
-                            if(pesanan){
-                                $('#nama_lengkap_output').text(": "+pesanan.nama_lengkap);
-                                $('#nomor_identitas_output').text(": "+pesanan.nomor_identitas);
-                                $('#no_hp_output').text(": "+pesanan.no_hp);
-                                $('#tempat_wisata_output').text(": "+pesanan.tempat_wisata);
-                                $('#pengunjung_dewasa_output').text(": "+pesanan.pengunjung_dewasa);
-                                $('#pengunjung_anak_output').text(": "+pesanan.pengunjung_anak);
-                                $('#harga_tiket_output').text(": Rp "+pesanan.harga_tiket);
-                                $('#total_bayar_output').text(": Rp "+pesanan.total_bayar);
-
-                                $('#pembayaran_tiket').removeClass('d-none');
-                                $('#back').removeClass('d-none');
-                                $('#cancel').addClass('d-none');
-                            }
-                        },
-                        error: function(xhr, ajaxOptions, thrownError) {
-                            alert(xhr.status + '\n' + xhr.responseText + '\n' + thrownError);
-                        }
-                    });
-                });
-
                 $('#cancel').click(function () {
                     $('#review_wisata_tab').addClass('d-none');
                 });
@@ -236,8 +163,7 @@
                     $('#back').addClass('d-none');
                     $('#cancel').removeClass('d-none');
                 });
-            })
-
+            });
         </script>
     </body>
 </html>
